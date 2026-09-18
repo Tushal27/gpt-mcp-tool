@@ -13,12 +13,13 @@ def save_work_log(summary: str, date: str = "") -> dict:
     now = datetime.now(timezone.utc).isoformat()
     conn = get_connection()
     try:
-        cur = conn.execute(
-            "INSERT INTO work_log (log_date, summary, created_at) VALUES (?, ?, ?)",
+        row = conn.execute(
+            "INSERT INTO work_log (log_date, summary, created_at) VALUES (%s, %s, %s) "
+            "RETURNING id, log_date, summary, created_at",
             (log_date, summary, now),
-        )
+        ).fetchone()
         conn.commit()
-        return {"id": cur.lastrowid, "log_date": log_date, "summary": summary, "created_at": now}
+        return row
     finally:
         conn.close()
 
@@ -30,13 +31,13 @@ def list_work_log(date_from: str = "", date_to: str = "") -> list[dict]:
         query = "SELECT id, log_date, summary, created_at FROM work_log WHERE 1=1"
         params: list[str] = []
         if date_from:
-            query += " AND log_date >= ?"
+            query += " AND log_date >= %s"
             params.append(date_from)
         if date_to:
-            query += " AND log_date <= ?"
+            query += " AND log_date <= %s"
             params.append(date_to)
         query += " ORDER BY log_date DESC, created_at DESC"
         rows = conn.execute(query, params).fetchall()
-        return [dict(row) for row in rows]
+        return rows
     finally:
         conn.close()

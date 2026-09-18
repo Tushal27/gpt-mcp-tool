@@ -8,12 +8,13 @@ def save_memory(content: str, tags: str = "") -> dict:
     now = datetime.now(timezone.utc).isoformat()
     conn = get_connection()
     try:
-        cur = conn.execute(
-            "INSERT INTO memories (content, tags, created_at) VALUES (?, ?, ?)",
+        row = conn.execute(
+            "INSERT INTO memories (content, tags, created_at) VALUES (%s, %s, %s) "
+            "RETURNING id, content, tags, created_at",
             (content, tags, now),
-        )
+        ).fetchone()
         conn.commit()
-        return {"id": cur.lastrowid, "content": content, "tags": tags, "created_at": now}
+        return row
     finally:
         conn.close()
 
@@ -25,9 +26,9 @@ def search_memory(query: str) -> list[dict]:
     try:
         rows = conn.execute(
             "SELECT id, content, tags, created_at FROM memories "
-            "WHERE content LIKE ? OR tags LIKE ? ORDER BY created_at DESC",
+            "WHERE content ILIKE %s OR tags ILIKE %s ORDER BY created_at DESC",
             (like, like),
         ).fetchall()
-        return [dict(row) for row in rows]
+        return rows
     finally:
         conn.close()

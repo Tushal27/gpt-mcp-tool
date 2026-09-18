@@ -1,23 +1,36 @@
-import sqlite3
-from pathlib import Path
+import psycopg
+from psycopg.rows import dict_row
 
-from .config import BASE_DIR, DB_PATH
+from .config import BASE_DIR, DATABASE_URL, DB_SCHEMA
 
 _SCHEMA_PATH = BASE_DIR / "db" / "schema.sql"
 
 
-def get_connection() -> sqlite3.Connection:
-    Path(DB_PATH).parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
+def get_connection() -> psycopg.Connection:
+    conn = psycopg.connect(DATABASE_URL, row_factory=dict_row)
+    conn.execute(f'SET search_path TO "{DB_SCHEMA}"')
     return conn
 
 
 def init_db() -> None:
     schema = _SCHEMA_PATH.read_text(encoding="utf-8")
-    conn = get_connection()
+    statements = [s.strip() for s in schema.split(";") if s.strip()]
+    conn = psycopg.connect(DATABASE_URL)
     try:
-        conn.executescript(schema)
+        conn.execute(f'CREATE SCHEMA IF NOT EXISTS "{DB_SCHEMA}"')
+        conn.execute(f'SET search_path TO "{DB_SCHEMA}"')
+        for statement in statements:
+            conn.execute(statement)
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def drop_schema() -> None:
+    """Test-only helper: drop an isolated test schema and everything in it."""
+    conn = psycopg.connect(DATABASE_URL)
+    try:
+        conn.execute(f'DROP SCHEMA IF EXISTS "{DB_SCHEMA}" CASCADE')
         conn.commit()
     finally:
         conn.close()

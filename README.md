@@ -6,11 +6,9 @@ tasks — instead of those just being replies that vanish.
 
 ## Status
 
-Tools run against a local SQLite database. Both transports are wired up:
-stdio (for local Inspector testing) and streamable HTTP (for real remote use,
-e.g. from ChatGPT). SQLite is fine for now — it resets on redeploy since
-Render's free disk is ephemeral, so treat early tests as disposable until
-Postgres is wired up (planned, not done yet).
+Live and connected to Claude. Storage is Postgres (Supabase), so data
+survives Render restarts/redeploys. Both transports are wired up: stdio (for
+local Inspector testing) and streamable HTTP (for real remote use).
 
 ## Setup
 
@@ -19,11 +17,20 @@ py -3 -m venv .venv
 ./.venv/Scripts/python.exe -m pip install -r requirements.txt
 ```
 
+Copy `.env.example` to `.env` and fill in `DATABASE_URL` (a Supabase Postgres
+connection string — the "Connection pooling" URI, Transaction mode, port
+6543, matches this app's connect-per-request pattern). Everything here
+(local dev, tests, and prod) talks to the same Postgres instance.
+
 ## Run tests
 
 ```
 ./.venv/Scripts/python.exe -m pytest tests/ -v
 ```
+
+Each test runs in its own throwaway Postgres schema (created and dropped
+automatically) so nothing touches real data — but this means tests need a
+reachable `DATABASE_URL` set in the environment.
 
 ## Run the server locally (stdio)
 
@@ -56,8 +63,9 @@ a quick local check, but **always set it before deploying anywhere public**.
 
 1. Push this repo to GitHub, create a new Render Web Service from it — `render.yaml`
    already defines the build/start commands (`uvicorn server.asgi:app --host 0.0.0.0 --port $PORT`).
-2. In Render's dashboard, set the `MCP_AUTH_TOKEN` env var to a long random
-   secret (it's marked `sync: false` in `render.yaml` so Render will prompt for it).
+2. In Render's dashboard, set `MCP_AUTH_TOKEN` (a long random secret) and
+   `DATABASE_URL` (your Supabase connection string) — both marked `sync: false`
+   in `render.yaml` so Render will prompt for them.
 3. Once deployed, your MCP endpoint is `https://<your-render-app>.onrender.com/mcp`.
 
 ## Connect it to Claude or ChatGPT

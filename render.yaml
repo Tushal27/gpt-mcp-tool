@@ -8,5 +8,5 @@ services:
     envVars:
       - key: MCP_AUTH_TOKEN
         sync: false
-      - key: FF_DB_PATH
-        value: /opt/render/project/src/db/ff.sqlite3
+      - key: DATABASE_URL
+        sync: false

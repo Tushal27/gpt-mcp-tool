@@ -46,9 +46,12 @@ verify behavior before wiring anything remote.
 MCP_AUTH_TOKEN=your-own-secret ./.venv/Scripts/python.exe -m uvicorn server.asgi:app --host 0.0.0.0 --port 8765
 ```
 
-The MCP endpoint is `POST /mcp`, protected by `Authorization: Bearer <MCP_AUTH_TOKEN>`.
-If `MCP_AUTH_TOKEN` is unset, auth is skipped — convenient for a quick local
-check, but **always set it before deploying anywhere public**.
+The MCP endpoint is `POST /mcp`, protected by an `X-MCP-Auth-Token: <MCP_AUTH_TOKEN>`
+header (deliberately not `Authorization` — some MCP clients, e.g. Claude's
+connector UI with sign-in enabled, reserve that header name for their own
+OAuth flow and won't let you set it manually). If `MCP_AUTH_TOKEN` is unset,
+auth is skipped — convenient for a quick local check, but **always set it
+before deploying anywhere public**.
 
 ## Deploy to Render
 
@@ -58,20 +61,18 @@ check, but **always set it before deploying anywhere public**.
    secret (it's marked `sync: false` in `render.yaml` so Render will prompt for it).
 3. Once deployed, your MCP endpoint is `https://<your-render-app>.onrender.com/mcp`.
 
-## Connect it to ChatGPT
+## Connect it to Claude or ChatGPT
 
-1. In ChatGPT, go to Settings → Connectors (may require enabling Developer
-   Mode / a custom connector option, depending on your plan/tier — check this
-   first, since not all ChatGPT plans expose custom MCP connectors).
-2. Add a custom connector pointing at `https://<your-render-app>.onrender.com/mcp`,
-   with the same bearer token you set in `MCP_AUTH_TOKEN`.
-3. In a chat, try: "save this as today's work: scaffolded the ff MCP server" —
+Custom remote MCP connectors require ChatGPT Pro/Business (not available on
+lower tiers) — Claude Pro supports them too, without that tier restriction.
+
+1. Settings → Connectors → Add custom connector.
+2. URL: `https://<your-render-app>.onrender.com/mcp`.
+3. Auth: add a custom header (not "Authorization" — see note above) named
+   `X-MCP-Auth-Token` with the value you set as `MCP_AUTH_TOKEN`.
+4. In a chat, try: "save this as today's work: scaffolded the ff MCP server" —
    it should call `save_work_log`. Then try "what's on my task list" or
    "remember that ..." to exercise the other tools.
-4. If your ChatGPT plan doesn't support custom MCP connectors at all, the
-   fallback is wrapping these same tool functions in an OpenAPI spec and
-   using them as a Custom GPT Action instead — the tool logic in `server/tools/`
-   doesn't need to change for that.
 
 ## Tools (v1)
 

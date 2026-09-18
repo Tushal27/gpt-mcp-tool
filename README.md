@@ -83,17 +83,33 @@ lower tiers) — Claude Pro supports them too, without that tier restriction.
 
 ## Tools (v1)
 
-- `save_memory(content, tags?)`
-- `search_memory(query)`
+- `save_memory(content, tags?)` — embeds the content via Voyage AI and stores it for semantic search
+- `search_memory(query)` — semantic search (pgvector cosine similarity), not substring match
 - `save_work_log(summary, date?)`
 - `list_work_log(date_from?, date_to?)`
 - `create_task(title, due?, priority?)`
 - `list_tasks(status?)`
 - `complete_task(task_id)`
 
+## Web dashboard
+
+`GET /dashboard?token=<MCP_AUTH_TOKEN>` — a read-only page showing recent
+memories, work log, and open tasks. Bookmark it with the token in the URL.
+
+## Daily digest email
+
+`GET /tasks/daily-digest?token=<MCP_AUTH_TOKEN>` — sends an email (via Resend)
+summarizing work log entries since yesterday and all open tasks. Wire up a
+free external cron (e.g. cron-job.org) to hit this URL once a day; Render's
+free tier will cold-start on the ping if it was idle.
+
+Requires `VOYAGE_API_KEY`, `RESEND_API_KEY`, and `DIGEST_EMAIL_TO` (see
+`.env.example`) — set these in Render's dashboard too when deploying.
+
 ## Roadmap
 
-See `C:\Users\ADMIN\.claude\plans\indexed-stargazing-perlis.md` for the full
-phased plan (Week 2: Postgres + remote HTTP + auth + Render deploy. Week 3:
-wire into ChatGPT as a connector, or fall back to a Custom GPT Action if the
-account tier doesn't support MCP connectors).
+See `C:\Users\ADMIN\.claude\plans\indexed-stargazing-perlis.md`. Possible
+next steps discussed but not yet started: a voice ("Jarvis"-style) interface
+via Siri Shortcuts/Google Assistant routines hitting a new endpoint backed by
+the Claude API directly; GitHub commit auto-logging (deferred, not needed
+right now).

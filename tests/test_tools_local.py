@@ -22,15 +22,26 @@ def isolated_schema(monkeypatch):
     db.drop_schema()
 
 
-def test_save_and_search_memory(isolated_schema):
-    from server.tools.memory import save_memory, search_memory
+def _fake_embed(text: str, input_type: str) -> list[float]:
+    """Deterministic stand-in for the real Voyage API: one-hot on whether
+    "postgres" appears, so cosine distance cleanly separates the two topics
+    without needing network access or an API key in tests."""
+    vector = [0.0] * 512
+    vector[0] = 1.0 if "postgres" in text.lower() else -1.0
+    return vector
 
-    save_memory("The MCP server now uses Postgres", tags="ff,mcp")
-    save_memory("Unrelated note about groceries", tags="personal")
 
-    results = search_memory("Postgres")
-    assert len(results) == 1
-    assert "Postgres" in results[0]["content"]
+def test_save_and_search_memory(isolated_schema, monkeypatch):
+    import server.tools.memory as memory_tools
+
+    monkeypatch.setattr(memory_tools, "embed", _fake_embed)
+
+    memory_tools.save_memory("The MCP server now uses Postgres", tags="ff,mcp")
+    memory_tools.save_memory("Unrelated note about groceries", tags="personal")
+
+    results = memory_tools.search_memory("Tell me about Postgres")
+    assert len(results) == 2
+    assert "Postgres" in results[0]["content"]  # closer match ranked first
 
 
 def test_save_and_list_work_log(isolated_schema):

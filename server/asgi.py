@@ -8,7 +8,9 @@ import os
 from mcp.server.transport_security import TransportSecuritySettings
 
 from .auth import BearerAuthMiddleware
+from .dashboard import dashboard_endpoint
 from .db import init_db
+from .digest import daily_digest_endpoint
 from .mcp_app import mcp
 
 init_db()
@@ -32,3 +34,5 @@ app = mcp.streamable_http_app(
     ),
 )
 app.add_middleware(BearerAuthMiddleware)
+app.add_route("/dashboard", dashboard_endpoint, methods=["GET"])
+app.add_route("/tasks/daily-digest", daily_digest_endpoint, methods=["GET"])

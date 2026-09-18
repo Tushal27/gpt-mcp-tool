@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: ff-mcp-memory
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn server.asgi:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: MCP_AUTH_TOKEN
+        sync: false
+      - key: FF_DB_PATH
+        value: /opt/render/project/src/db/ff.sqlite3

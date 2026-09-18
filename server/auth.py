@@ -4,14 +4,14 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
-# Not "Authorization" on purpose: some MCP clients (e.g. Claude's connector
-# UI, when sign-in/OAuth is enabled) reserve that header name for their own
-# use and refuse to let you set it manually.
-AUTH_HEADER_NAME = "x-mcp-auth-token"
+# Not "Authorization" (reserved by Claude's connector sign-in/OAuth flow) and
+# not an "x-mcp-*" prefix (reserved-looking to connector UIs too) — a plain
+# custom header name avoids both restrictions.
+AUTH_HEADER_NAME = "x-api-token"
 
 
 class BearerAuthMiddleware(BaseHTTPMiddleware):
-    """Rejects requests missing a valid X-MCP-Auth-Token header.
+    """Rejects requests missing a valid X-Api-Token header.
 
     If MCP_AUTH_TOKEN is unset, auth is skipped entirely — convenient for local
     HTTP testing, but the token MUST be set before deploying anywhere public.

@@ -46,12 +46,11 @@ verify behavior before wiring anything remote.
 MCP_AUTH_TOKEN=your-own-secret ./.venv/Scripts/python.exe -m uvicorn server.asgi:app --host 0.0.0.0 --port 8765
 ```
 
-The MCP endpoint is `POST /mcp`, protected by an `X-MCP-Auth-Token: <MCP_AUTH_TOKEN>`
-header (deliberately not `Authorization` — some MCP clients, e.g. Claude's
-connector UI with sign-in enabled, reserve that header name for their own
-OAuth flow and won't let you set it manually). If `MCP_AUTH_TOKEN` is unset,
-auth is skipped — convenient for a quick local check, but **always set it
-before deploying anywhere public**.
+The MCP endpoint is `POST /mcp`, protected by an `X-Api-Token: <MCP_AUTH_TOKEN>`
+header (deliberately not `Authorization`, and not an `x-mcp-*` prefix either —
+both looked reserved to Claude's connector UI and it refused to let those be
+set manually). If `MCP_AUTH_TOKEN` is unset, auth is skipped — convenient for
+a quick local check, but **always set it before deploying anywhere public**.
 
 ## Deploy to Render
 
@@ -69,7 +68,7 @@ lower tiers) — Claude Pro supports them too, without that tier restriction.
 1. Settings → Connectors → Add custom connector.
 2. URL: `https://<your-render-app>.onrender.com/mcp`.
 3. Auth: add a custom header (not "Authorization" — see note above) named
-   `X-MCP-Auth-Token` with the value you set as `MCP_AUTH_TOKEN`.
+   `X-Api-Token` with the value you set as `MCP_AUTH_TOKEN`.
 4. In a chat, try: "save this as today's work: scaffolded the ff MCP server" —
    it should call `save_work_log`. Then try "what's on my task list" or
    "remember that ..." to exercise the other tools.

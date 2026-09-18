@@ -10,3 +10,9 @@ services:
         sync: false
       - key: DATABASE_URL
         sync: false
+      - key: VOYAGE_API_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: DIGEST_EMAIL_TO
+        sync: false

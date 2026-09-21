@@ -10,6 +10,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: android
@@ -41,3 +42,4 @@ jobs:
         with:
           name: jarvis-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 7

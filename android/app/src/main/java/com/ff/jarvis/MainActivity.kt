@@ -23,6 +23,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import java.io.IOException
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 private const val PREFS = "jarvis_prefs"
 private const val KEY_URL = "server_url"
@@ -39,7 +40,13 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var speechRecognizer: SpeechRecognizer
     private lateinit var tts: TextToSpeech
-    private val httpClient = OkHttpClient()
+    // The server (and the AI backend it calls) can be a cold-starting free
+    // host, so give the round trip a lot more than OkHttp's 10s default.
+    private val httpClient = OkHttpClient.Builder()
+        .connectTimeout(20, TimeUnit.SECONDS)
+        .readTimeout(100, TimeUnit.SECONDS)
+        .writeTimeout(20, TimeUnit.SECONDS)
+        .build()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -141,7 +148,7 @@ class MainActivity : AppCompatActivity() {
             .post(json.toRequestBody("application/json".toMediaType()))
             .build()
 
-        runOnUiThread { statusText.text = "Thinking..." }
+        runOnUiThread { statusText.text = "Thinking... (can take up to a minute if the server was idle)" }
 
         httpClient.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {

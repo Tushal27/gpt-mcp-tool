@@ -138,7 +138,10 @@ TOOLS = [
     },
 ]
 
-_client = OpenAI(api_key=AI_API_KEY, base_url=AI_API_URL)
+# AI_API_URL may itself be a free-tier host that needs to cold-start, on top
+# of tool-calling round trips — generous timeout so a slow-but-alive backend
+# doesn't get killed prematurely.
+_client = OpenAI(api_key=AI_API_KEY, base_url=AI_API_URL, timeout=90.0)
 
 
 def run_agent_turn(user_text: str) -> str:
@@ -195,5 +198,13 @@ async def voice_command_endpoint(request: Request) -> JSONResponse:
     text = (body.get("text") or "").strip()
     if not text:
         return JSONResponse({"error": "missing 'text'"}, status_code=400)
-    reply = run_agent_turn(text)
+
+    try:
+        reply = run_agent_turn(text)
+    except Exception:
+        # Always return 200 with a speakable reply — this is a voice UI, so a
+        # raw 500/timeout gives the app nothing sensible to say out loud. The
+        # AI backend cold-starting or erroring is the most likely cause.
+        reply = "Sorry, I couldn't reach my brain just now — give it a few seconds and try again."
+
     return JSONResponse({"reply": reply})

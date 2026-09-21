@@ -115,6 +115,22 @@ function-calling tools, and returns `{"reply": "..."}` in short,
 speakable-aloud style (see `server/voice_agent.py`'s system prompt). Backs
 the Android app in `android/` (tap-to-talk, not a hands-free wake word).
 
+## Android app
+
+`android/` is a minimal Kotlin app (one screen: server URL + token fields,
+a "Tap to Talk" button, a status/reply line). Tap it, speak, and it:
+
+1. Transcribes speech on-device via Android's `SpeechRecognizer` (free, no API).
+2. POSTs `{"text": "..."}` to `/voice/command` with the `X-Api-Token` header.
+3. Speaks the JSON `reply` back via Android's `TextToSpeech`.
+
+No local Android Studio/SDK needed to build it — pushing changes under
+`android/` triggers `.github/workflows/android-build.yml`, which builds the
+debug APK in GitHub's cloud runners and uploads it as a workflow artifact.
+Download the APK from the Actions run, transfer it to your phone, and install
+it directly (you'll need to allow "install unknown apps" for whatever app you
+use to open the file).
+
 ## Roadmap
 
 See `C:\Users\ADMIN\.claude\plans\indexed-stargazing-perlis.md`. Possible

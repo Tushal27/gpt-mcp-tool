@@ -10,12 +10,16 @@ from .config import MCP_AUTH_TOKEN
 AUTH_HEADER_NAME = "x-api-token"
 
 
-class BearerAuthMiddleware(BaseHTTPMiddleware):
-    """Rejects /mcp requests missing a valid X-Api-Token header.
+GUARDED_PREFIXES = ("/mcp", "/voice")
 
-    Only guards /mcp — /dashboard and /tasks/daily-digest are hit by a
-    browser or an external cron ping, neither of which can set a custom
-    header, so those routes check a ?token= query param themselves instead.
+
+class BearerAuthMiddleware(BaseHTTPMiddleware):
+    """Rejects /mcp and /voice requests missing a valid X-Api-Token header.
+
+    Both are hit by clients that can set custom headers (Claude's connector,
+    our own Android app) — unlike /dashboard and /tasks/daily-digest, which
+    are hit by a browser or an external cron ping and check a ?token= query
+    param instead.
 
     If MCP_AUTH_TOKEN is unset, auth is skipped entirely — convenient for
     local HTTP testing, but the token MUST be set before deploying anywhere
@@ -23,7 +27,7 @@ class BearerAuthMiddleware(BaseHTTPMiddleware):
     """
 
     async def dispatch(self, request: Request, call_next):
-        if not MCP_AUTH_TOKEN or not request.url.path.startswith("/mcp"):
+        if not MCP_AUTH_TOKEN or not request.url.path.startswith(GUARDED_PREFIXES):
             return await call_next(request)
 
         header = request.headers.get(AUTH_HEADER_NAME, "")

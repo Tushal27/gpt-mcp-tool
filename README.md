@@ -106,10 +106,18 @@ free tier will cold-start on the ping if it was idle.
 Requires `VOYAGE_API_KEY`, `RESEND_API_KEY`, and `DIGEST_EMAIL_TO` (see
 `.env.example`) — set these in Render's dashboard too when deploying.
 
+## Voice agent ("Jarvis")
+
+`POST /voice/command` with `{"text": "..."}` (and the `X-Api-Token` header) —
+runs an agent loop against an OpenAI-compatible chat completions endpoint
+(`AI_API_URL`/`AI_API_KEY`/`AI_MODEL`) with the 7 tools above bound as
+function-calling tools, and returns `{"reply": "..."}` in short,
+speakable-aloud style (see `server/voice_agent.py`'s system prompt). Backs
+the Android app in `android/` (tap-to-talk, not a hands-free wake word).
+
 ## Roadmap
 
 See `C:\Users\ADMIN\.claude\plans\indexed-stargazing-perlis.md`. Possible
-next steps discussed but not yet started: a voice ("Jarvis"-style) interface
-via Siri Shortcuts/Google Assistant routines hitting a new endpoint backed by
-the Claude API directly; GitHub commit auto-logging (deferred, not needed
-right now).
+next steps: a hands-free wake-word mode (foreground service + a wake-word
+engine like Picovoice Porcupine) instead of tap-to-talk; GitHub commit
+auto-logging (deferred, not needed right now).

@@ -16,3 +16,8 @@ MCP_AUTH_TOKEN = os.environ.get("MCP_AUTH_TOKEN", "")
 VOYAGE_API_KEY = os.environ.get("VOYAGE_API_KEY", "")
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 DIGEST_EMAIL_TO = os.environ.get("DIGEST_EMAIL_TO", "")
+
+# OpenAI-compatible endpoint powering the voice ("Jarvis") agent.
+AI_API_URL = os.environ.get("AI_API_URL", "")
+AI_API_KEY = os.environ.get("AI_API_KEY", "")
+AI_MODEL = os.environ.get("AI_MODEL") or "auto"

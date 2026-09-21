@@ -16,3 +16,9 @@ services:
         sync: false
       - key: DIGEST_EMAIL_TO
         sync: false
+      - key: AI_API_URL
+        sync: false
+      - key: AI_API_KEY
+        sync: false
+      - key: AI_MODEL
+        value: auto

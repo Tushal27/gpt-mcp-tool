@@ -1,7 +1,11 @@
-import { chromium } from 'playwright-core';
+import { chromium } from 'playwright';
+import { FAKE_SDK } from './fake-sdk.mjs';
+
+// Playwright finds its own browser unless an image provides one.
+const LAUNCH = process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {};
 
 const VIEWS = ['dashboard','plan','problems','weekdays','mocks','strategy','templates','checklists','errors','research','account'];
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+const browser = await chromium.launch(LAUNCH);
 let fail = 0;
 
 for (const [name, vp] of [['mobile',{width:390,height:844}], ['laptop',{width:1440,height:900}]]) {
@@ -10,6 +14,11 @@ for (const [name, vp] of [['mobile',{width:390,height:844}], ['laptop',{width:14
   const errs = [];
   page.on('pageerror', e => errs.push(`pageerror: ${e.message}`));
   page.on('console', m => { if (m.type() === 'error') errs.push(`console: ${m.text()}`); });
+
+  // Intercept the SDK so the suite is hermetic: it must pass offline, and a
+  // slow or blocked CDN must never look like a rendering failure.
+  await page.route('**/@supabase/supabase-js**', r =>
+    r.fulfill({ status: 200, contentType: 'application/javascript; charset=utf-8', body: FAKE_SDK }));
 
   await page.goto('http://127.0.0.1:8138/', { waitUntil: 'networkidle' });
 

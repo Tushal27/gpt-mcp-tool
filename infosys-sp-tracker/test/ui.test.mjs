@@ -1,7 +1,10 @@
-import { chromium } from 'playwright-core';
+import { chromium } from 'playwright';
 import { FAKE_SDK } from './fake-sdk.mjs';
 
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+// Playwright finds its own browser unless an image provides one.
+const LAUNCH = process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {};
+
+const browser = await chromium.launch(LAUNCH);
 let fails = 0;
 const chk = (c, m) => { if (!c) fails++; console.log(`  ${c ? '✓' : '✗'} ${m}`); };
 

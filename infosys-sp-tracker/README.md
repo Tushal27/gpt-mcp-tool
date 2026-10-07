@@ -128,16 +128,24 @@ Editing the plan means editing `data.js` only — the render code reads everythi
 ## Development
 
 ```bash
-npm i          # playwright-core, for the browser suites only
-npm start      # serve at http://localhost:8137
-npm test       # store logic: union semantics, optimistic concurrency, outbox replay
-npm run test:ui  # renders every view at 390px and 1440px, then drives the signed-in flow
+npm start   # serve at http://localhost:8137
+npm test    # store logic: union semantics, optimistic concurrency, outbox replay
 ```
 
-`npm test` runs in Node with a fake Supabase client — no project and no network needed.
-`npm run test:ui` serves a temp copy with stub credentials and intercepts the SDK import, so the
-browser suites exercise the real signed-in path, including the cross-device conflict merge.
-Screenshots land in `test/out/`.
+**No dependencies.** `npm test` uses Node's built-in test runner and a fake Supabase client, and
+`npm start` uses a small bundled static server — so both work on Windows, macOS and Linux with
+nothing installed but Node 18+.
+
+The browser suites are opt-in, because they pull a ~150 MB browser you do not otherwise need:
+
+```bash
+npm i -D playwright
+npm run test:ui
+```
+
+That serves a temp copy with stub credentials and intercepts the SDK import, so the browser suites
+are hermetic — they pass offline and never touch a real Supabase project. Screenshots land in
+`test/out/`. Set `CHROMIUM_PATH` to reuse a browser an image already provides.
 
 What the suites cover:
 

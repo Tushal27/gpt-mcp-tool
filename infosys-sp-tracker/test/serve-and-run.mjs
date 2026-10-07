@@ -8,8 +8,11 @@ import { spawn } from 'node:child_process';
 import { cp, mkdtemp, writeFile, mkdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { startServer } from './static-server.mjs';
 
-const ROOT = new URL('..', import.meta.url).pathname;
+// fileURLToPath, not .pathname: on Windows .pathname yields "/C:/...".
+const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const PORT = 8138;
 
 const dir = await mkdtemp(join(tmpdir(), 'ispt-site-'));
@@ -18,18 +21,16 @@ await writeFile(join(dir, 'config.js'),
   `export const SUPABASE_URL='https://faked.supabase.co';\nexport const SUPABASE_ANON_KEY='faked-anon-key';\n`);
 await mkdir(join(ROOT, 'test/out'), { recursive: true });
 
-const server = spawn('python3', ['-m', 'http.server', String(PORT), '--bind', '127.0.0.1'],
-  { cwd: dir, stdio: 'ignore' });
-await new Promise(r => setTimeout(r, 1200));
+const server = await startServer({ port: PORT, root: dir });
 
 let code = 0;
 for (const suite of ['render.test.mjs', 'ui.test.mjs']) {
   console.log(`\n=== ${suite}`);
-  const r = spawn('node', [join(ROOT, 'test', suite)], { stdio: 'inherit', cwd: ROOT });
+  const r = spawn(process.execPath, [join(ROOT, 'test', suite)], { stdio: 'inherit', cwd: ROOT });
   const status = await new Promise(res => r.on('close', res));
   if (status !== 0) code = status;
 }
 
-server.kill();
+server.close();
 await rm(dir, { recursive: true, force: true });
 process.exit(code);

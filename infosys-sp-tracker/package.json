@@ -5,11 +5,11 @@
   "type": "module",
   "description": "5-week preparation tracker for the Infosys Specialist Programmer proctored coding round.",
   "scripts": {
-    "start": "python3 -m http.server 8137 --bind 127.0.0.1",
+    "start": "node test/static-server.mjs 8137 .",
     "test": "node --test test/store.test.mjs",
     "test:ui": "node test/serve-and-run.mjs"
   },
   "devDependencies": {
-    "playwright-core": "^1.47.0"
+    "playwright": "^1.63.0"
   }
 }

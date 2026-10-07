@@ -4,9 +4,12 @@ import assert from 'node:assert/strict';
 import { mkdtemp, cp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import test from 'node:test';
 
-const SRC = new URL('..', import.meta.url).pathname;
+// fileURLToPath, not .pathname: on Windows .pathname yields "/C:/..." which is
+// not a usable filesystem path.
+const SRC = fileURLToPath(new URL('..', import.meta.url));
 const dir = await mkdtemp(join(tmpdir(), 'ispt-'));
 await cp(SRC, dir, { recursive: true });
 await writeFile(join(dir, 'config.js'),
@@ -62,7 +65,10 @@ async function freshStore(row) {
     setItem(k, v) { this._m.set(k, v); },
     removeItem(k) { this._m.delete(k); }
   };
-  const mod = await import(join(dir, 'assets/js/store.js') + `?t=${Math.random()}`);
+  // import() takes a URL. A bare Windows path ("C:\\...") is rejected as an
+  // unsupported scheme, so convert before appending the cache-buster.
+  const url = pathToFileURL(join(dir, 'assets/js/store.js'));
+  const mod = await import(`${url.href}?t=${Math.random()}`);
   await mod.store.init();
   return { store: mod.store, fake, unionStates: mod.unionStates };
 }

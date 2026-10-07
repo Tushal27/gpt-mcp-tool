@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Infosys SP Prep</title>
+<meta name="description" content="Evidence-based 5-week preparation tracker for the Infosys Specialist Programmer proctored coding round.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body data-palette="#2a78d6,#eb6834,#1baf7a">
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true">SP</span>
+    <span class="brand-text">
+      <strong>Infosys SP Prep</strong>
+      <small id="countdown">—</small>
+    </span>
+  </div>
+
+  <div class="topbar-right">
+    <button class="pill sync" id="syncPill" type="button" aria-live="polite">
+      <span class="dot" aria-hidden="true"></span><span class="sync-text">Starting…</span>
+    </button>
+    <button class="iconbtn" id="themeToggle" aria-label="Switch theme" title="Switch theme">
+      <svg viewBox="0 0 24 24" aria-hidden="true" class="ic-sun"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/></svg>
+      <svg viewBox="0 0 24 24" aria-hidden="true" class="ic-moon"><path d="M20 14.2A8.2 8.2 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2z"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="nav" id="nav" aria-label="Sections">
+    <a href="#dashboard" data-view="dashboard"><span class="ni" aria-hidden="true">◎</span>Dashboard</a>
+    <a href="#plan"      data-view="plan"><span class="ni" aria-hidden="true">▤</span>5-week plan</a>
+    <a href="#problems"  data-view="problems"><span class="ni" aria-hidden="true">✓</span>Problems</a>
+    <a href="#weekdays"  data-view="weekdays"><span class="ni" aria-hidden="true">▶</span>Weekday theory</a>
+    <a href="#mocks"     data-view="mocks"><span class="ni" aria-hidden="true">⏱</span>Mocks</a>
+    <a href="#strategy"  data-view="strategy"><span class="ni" aria-hidden="true">⚑</span>Exam strategy</a>
+    <a href="#templates" data-view="templates"><span class="ni" aria-hidden="true">⌨</span>Templates</a>
+    <a href="#checklists" data-view="checklists"><span class="ni" aria-hidden="true">☑</span>Final 7 days</a>
+    <a href="#errors"    data-view="errors"><span class="ni" aria-hidden="true">⚠</span>Error log</a>
+    <a href="#research"  data-view="research"><span class="ni" aria-hidden="true">🔍</span>Research</a>
+    <a href="#account"   data-view="account"><span class="ni" aria-hidden="true">⚙</span>Account &amp; data</a>
+  </nav>
+
+  <main id="main" tabindex="-1"></main>
+</div>
+
+<div class="gate" id="gate" hidden>
+  <div class="gate-card" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
+    <h1 id="gateTitle">Sign in to sync</h1>
+    <p class="muted" id="gateBlurb">Your progress lives in Supabase, so the same ticks show up on your phone and your laptop.</p>
+    <form id="emailForm" class="gate-form">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" autocomplete="email" required placeholder="you@example.com" inputmode="email">
+      <button class="btn primary" type="submit">Email me a sign-in code</button>
+    </form>
+    <form id="codeForm" class="gate-form" hidden>
+      <label for="code">6-digit code from the email</label>
+      <input type="text" id="code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="8" placeholder="123456">
+      <button class="btn primary" type="submit">Verify &amp; open</button>
+      <button class="btn ghost" type="button" id="backToEmail">Use a different email</button>
+      <p class="muted small">Tapping the link in the email works too — the code is for when you check mail on a different device.</p>
+    </form>
+    <p class="gate-msg" id="gateMsg" role="status"></p>
+  </div>
+</div>
+
+<div class="gate" id="setup" hidden>
+  <div class="gate-card" role="dialog" aria-modal="true" aria-labelledby="setupTitle">
+    <h1 id="setupTitle">One-time setup</h1>
+    <p class="muted">This build has no Supabase credentials yet, so there is nowhere to sync to.</p>
+    <ol class="setup-steps">
+      <li>Create a free project at <strong>supabase.com</strong>.</li>
+      <li>SQL Editor → paste <code>supabase/schema.sql</code> from this repo → Run.</li>
+      <li>Project Settings → API → copy the <strong>Project URL</strong> and the <strong>anon / publishable key</strong>.</li>
+      <li>Paste both into <code>config.js</code>, commit, redeploy.</li>
+      <li>Authentication → URL Configuration → add your site URL to <strong>Redirect URLs</strong>.</li>
+    </ol>
+    <p class="muted small">Both values are safe to commit publicly. Row Level Security is what protects your data, and the schema above enables it.</p>
+  </div>
+</div>
+
+<div class="conflict-bar" id="noSdk" hidden style="border-top-color:var(--serious)">
+  <div>
+    <strong>Running without sync.</strong>
+    <span class="muted">The Supabase client could not be loaded, so nothing you tick here is saved. Check your connection and reload.</span>
+  </div>
+  <div class="conflict-actions"><button class="btn" type="button" onclick="location.reload()">Reload</button></div>
+</div>
+
+<div class="conflict-bar" id="conflictBar" hidden>
+  <div>
+    <strong>Another device saved newer progress.</strong>
+    <span class="muted">Pick one — merge keeps every tick from both.</span>
+  </div>
+  <div class="conflict-actions">
+    <button class="btn primary" id="cfMerge" type="button">Merge both</button>
+    <button class="btn" id="cfRemote" type="button">Use other device</button>
+    <button class="btn ghost" id="cfLocal" type="button">Keep this device</button>
+  </div>
+</div>
+
+<script type="module" src="assets/js/app.js"></script>
+</body>
+</html>

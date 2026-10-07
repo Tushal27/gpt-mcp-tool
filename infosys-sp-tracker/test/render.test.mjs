@@ -23,8 +23,7 @@ for (const [name, vp] of [['mobile',{width:390,height:844}], ['laptop',{width:14
         chars: main.innerText.length,
         h1: main.querySelector('h1')?.textContent ?? null,
         overflowX: document.documentElement.scrollWidth > window.innerWidth + 1
-          ? document.documentElement.scrollWidth : 0,
-        setupVisible: !document.getElementById('setup').hidden
+          ? document.documentElement.scrollWidth : 0
       };
     });
     const bad = [];
@@ -36,7 +35,8 @@ for (const [name, vp] of [['mobile',{width:390,height:844}], ['laptop',{width:14
     else console.log(`  ✓ ${name}/${v} — "${info.h1}" (${info.chars} chars)`);
   }
 
-  // Only the setup gate should be up, since config.js still has placeholders.
+  // The harness serves stub credentials, so the site should be signed in with
+  // no gate showing. A visible setup gate means config.js was not picked up.
   const gates = await page.evaluate(() => ({
     setup: !document.getElementById('setup').hidden,
     auth: !document.getElementById('gate').hidden,
